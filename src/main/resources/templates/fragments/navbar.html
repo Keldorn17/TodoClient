@@ -1,0 +1,16 @@
+<!-- templates/fragments/navbar.html -->
+<nav th:fragment="navbar"
+     class="bg-white shadow-md py-4 px-6 flex justify-between items-center">
+
+    <a href="/todos" class="text-xl font-bold text-blue-600">
+        Todo Client
+    </a>
+
+    <div class="space-x-4">
+        <a href="/todos"
+           class="text-gray-700 hover:text-blue-500 transition">Todos</a>
+
+        <a href="/logout"
+           class="text-gray-700 hover:text-red-500 transition">Logout</a>
+    </div>
+</nav>

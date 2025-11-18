@@ -1,0 +1,79 @@
+<!-- templates/todos/list.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(
+          title='Todo List',
+          content=~{::content}
+      )}">
+
+<th:block th:fragment="content">
+
+    <h1 class="text-3xl font-bold mb-6">Your Todos</h1>
+
+    <form th:action="@{/todos}" th:object="${newTodo}"
+          method="post"
+          class="flex gap-4 items-center mb-6">
+
+        <input th:field="*{title}" placeholder="New Todo..."
+               class="border rounded px-3 py-2 w-64"/>
+
+        <button type="submit"
+                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Add
+        </button>
+    </form>
+
+    <div class="bg-white shadow rounded p-6">
+        <table class="w-full table-auto">
+            <thead>
+            <tr class="border-b">
+                <th class="text-left py-2">Title</th>
+                <th class="text-center py-2">Completed</th>
+                <th class="text-center py-2">Actions</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="todo : ${todos}" class="border-b hover:bg-gray-50">
+
+                <td class="py-2">
+                    <span th:text="${todo.title}"
+                          th:classappend="${todo.completed} ? 'line-through text-gray-400' : ''">
+                    </span>
+                </td>
+
+                <td class="text-center">
+                    <span th:if="${todo.completed}"
+                          class="bg-green-200 text-green-800 px-2 py-1 rounded text-sm">
+                        Done
+                    </span>
+                    <span th:if="${!todo.completed}"
+                          class="bg-yellow-200 text-yellow-800 px-2 py-1 rounded text-sm">
+                        Not Done
+                    </span>
+                </td>
+
+                <td class="text-center space-x-2">
+
+                    <form th:action="@{'/todos/' + ${todo.todoId} + '/patch'}"
+                          method="post" class="inline">
+                        <button class="px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                            Toggle
+                        </button>
+                    </form>
+
+                    <form th:action="@{'/todos/' + ${todo.todoId} + '/delete'}"
+                          method="post" class="inline">
+                        <button class="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700">
+                            Delete
+                        </button>
+                    </form>
+
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</th:block>
+</html>

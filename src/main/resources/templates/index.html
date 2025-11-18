@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/layout :: layout(
+        title='Welcome',
+        content=~{::thisContent}
+)}"></th:block>
+
+<th:block th:fragment="thisContent">
+    <div class="text-center mt-20">
+        <h1 class="text-4xl font-bold">Welcome to the Todo Client</h1>
+        <a href="/login" class="text-blue-500 underline mt-4 block">Login</a>
+        <a href="/register" class="text-blue-500 underline block">Register</a>
+    </div>
+</th:block>
+</html>

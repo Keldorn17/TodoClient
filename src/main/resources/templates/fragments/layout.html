@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:fragment="layout (title, content)">
+
+    <head>
+        <title th:text="${title}">Todo Client</title>
+        <th:block th:replace="~{fragments/header :: header}"></th:block>
+    </head>
+
+    <body class="bg-gray-100 min-h-screen flex flex-col">
+
+    <th:block th:replace="~{fragments/navbar :: navbar}"></th:block>
+
+    <main class="container mx-auto mt-8 flex-1">
+        <th:block th:replace="${content}"></th:block>
+    </main>
+
+    </body>
+
+</th:block>
+
+</html>
