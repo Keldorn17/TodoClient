@@ -2,15 +2,29 @@
 <nav th:fragment="navbar"
      class="bg-white shadow-md py-4 px-6 flex justify-between items-center">
 
-    <a href="/todos" class="text-xl font-bold text-blue-600">
+    <a th:if="${!loggedIn}" href="/" class="text-xl font-bold text-blue-600">
+        Todo Client
+    </a>
+
+    <a th:if="${loggedIn}" href="/todos" class="text-xl font-bold text-blue-600">
         Todo Client
     </a>
 
     <div class="space-x-4">
-        <a href="/todos"
+        <a th:if="${loggedIn}"
+           href="/todos"
            class="text-gray-700 hover:text-blue-500 transition">Todos</a>
 
-        <a href="/logout"
+        <a th:if="${loggedIn}"
+           href="/logout"
            class="text-gray-700 hover:text-red-500 transition">Logout</a>
+
+        <a th:if="${!loggedIn}"
+           href="/login"
+           class="text-gray-700 hover:text-blue-500 transition">Login</a>
+
+        <a th:if="${!loggedIn}"
+           href="/register"
+           class="text-gray-700 hover:text-blue-500 transition">Register</a>
     </div>
 </nav>

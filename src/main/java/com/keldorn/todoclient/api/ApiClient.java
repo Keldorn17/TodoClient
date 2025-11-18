@@ -1,6 +1,5 @@
 package com.keldorn.todoclient.api;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,23 +17,20 @@ public class ApiClient {
     @Value("${api.base.url}")
     private String apiBaseUrl;
 
-    private HttpHeaders forwardSessionCookies(HttpServletRequest request) {
+    private HttpHeaders authHeader(HttpServletRequest request) {
 
         HttpHeaders headers = new HttpHeaders();
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if ("JSESSIONID".equals(cookie.getName())) {
-                    headers.add("Cookie", "JSESSIONID=" + cookie.getValue());
-                }
-            }
+        headers.set("Accept", "application/json");
+        String token = (String) request.getSession().getAttribute("JWT");
+        if (token != null) {
+            headers.add("Authorization", "Bearer " + token);
         }
         return headers;
     }
 
     private <T> T exchange(String path, HttpMethod method, Object body, Class<T> responseType, HttpServletRequest request) {
 
-        HttpHeaders headers = forwardSessionCookies(request);
-        HttpEntity<Object> entity = new HttpEntity<>(body, headers);
+        HttpEntity<Object> entity = new HttpEntity<>(body, authHeader(request));
 
         return restTemplate.exchange(apiBaseUrl + path, method, entity, responseType).getBody();
     }
@@ -59,5 +55,7 @@ public class ApiClient {
         exchange(path, HttpMethod.PUT, body, Void.class, request);
     }
 
-
+    public <T> T postAndReturn(String path, Object body, Class<T> type, HttpServletRequest request) {
+        return exchange(path, HttpMethod.POST, body, type, request);
+    }
 }
