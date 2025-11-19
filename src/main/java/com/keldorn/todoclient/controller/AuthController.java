@@ -4,6 +4,7 @@ import com.keldorn.todoclient.dto.LoginRequest;
 import com.keldorn.todoclient.dto.UserRequest;
 import com.keldorn.todoclient.service.AuthUiService;
 import com.keldorn.todoclient.service.UserUiService;
+import com.keldorn.todoclient.util.ApiErrorParser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -62,7 +63,7 @@ public class AuthController {
             return "redirect:/login?registered";
 
         } catch (Exception ex) {
-            model.addAttribute("global", "Username or/and Email is taken.");
+            model.addAttribute("global", ApiErrorParser.getErrorMessage(ex.getMessage()));
             return "auth/register";
         }
     }
