@@ -47,10 +47,6 @@ public class ApiClient {
         exchange(path, HttpMethod.DELETE, null, Void.class, request);
     }
 
-    public void patch(String path, Object body, HttpServletRequest request) {
-        exchange(path, HttpMethod.PATCH, body, Void.class, request);
-    }
-
     public void put(String path, Object body, HttpServletRequest request) {
         exchange(path, HttpMethod.PUT, body, Void.class, request);
     }

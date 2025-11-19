@@ -41,14 +41,6 @@ public class TodoUiService {
         apiClient.put(ApiEndpoints.TODOS_URL + "/" + id, todoRequest, request);
     }
 
-    public void patchTodo(Long id, TodoRequest todoRequest, HttpServletRequest request) {
-        apiClient.patch(ApiEndpoints.TODOS_URL + "/" + id, todoRequest, request);
-    }
-
-    public <T> void patchGenericTodo(Long id, T todoRequest, HttpServletRequest request) {
-        apiClient.patch(ApiEndpoints.TODOS_URL + "/" + id, todoRequest, request);
-    }
-
     public void deleteTodo(Long id, HttpServletRequest request) {
         apiClient.delete(ApiEndpoints.TODOS_URL + "/" + id, request);
     }

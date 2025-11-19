@@ -1,8 +1,8 @@
 package com.keldorn.todoclient.controller;
 
-import com.keldorn.todoclient.dto.CompletedToggleRequest;
 import com.keldorn.todoclient.dto.TodoRequest;
 import com.keldorn.todoclient.dto.TodoResponse;
+import com.keldorn.todoclient.mapper.TodoMapper;
 import com.keldorn.todoclient.service.TodoUiService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +20,7 @@ import org.springframework.web.client.HttpClientErrorException;
 public class TodoController {
 
     private final TodoUiService todoUiService;
+    private final TodoMapper todoMapper;
 
     @GetMapping
     public String listTodos(Model model, HttpServletRequest request) {
@@ -52,26 +53,17 @@ public class TodoController {
     public String updateTodo(@PathVariable Long id,
                              @ModelAttribute("editTodo") TodoRequest todoRequest,
                              HttpServletRequest request) {
-//        TodoResponse todo = todoUiService.getTodoById(id, request);
-//        todoRequest.setCompleted(todo.completed());
         todoUiService.updateTodo(id, todoRequest, request);
-        return "redirect:/todos";
-    }
-
-    @PostMapping("/{id}/patch")
-    public String patchTodo(@PathVariable Long id,
-                             @ModelAttribute("editTodo") TodoRequest todoRequest,
-                             HttpServletRequest request) {
-        todoUiService.patchTodo(id, todoRequest, request);
         return "redirect:/todos";
     }
 
     @PostMapping("/{id}/completed/toggle")
     public String toggleCompleted(@PathVariable Long id, HttpServletRequest request) {
         TodoResponse response = todoUiService.getTodoById(id, request);
-        CompletedToggleRequest completedToggleRequest = new CompletedToggleRequest(!response.completed());
+        TodoRequest todoRequest = todoMapper.toRequest(response);
+        todoRequest.setCompleted(!todoRequest.getCompleted());
 
-        todoUiService.patchGenericTodo(id, completedToggleRequest, request);
+        todoUiService.updateTodo(id, todoRequest, request);
         return "redirect:/todos";
     }
 
