@@ -1,10 +1,7 @@
 <!-- templates/todos/list.html -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{fragments/layout :: layout(
-          title='My Tasks',
-          content=~{::content}
-      )}">
+      th:replace="~{fragments/layout :: layout(title='My Tasks', content=~{::content})}">
 
 <th:block th:fragment="content">
 
@@ -34,14 +31,25 @@
                     </div>
 
                     <div class="relative group">
-                        <button class="text-text-secondary hover:text-text-light">
+                        <button class="text-text-secondary hover:text-text-light"
+                                aria-expanded="false"
+                                aria-controls="actions-menu-{{todo.todoId}}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
                         </button>
 
-                        <div class="absolute right-0 mt-2 w-48 bg-background-dark rounded-lg shadow-xl z-10 hidden group-hover:block">
+                        <div th:id="'actions-menu-' + ${todo.todoId}"
+                             class="absolute right-0 w-48 bg-background-dark rounded-lg shadow-xl z-10 hidden group-hover:block -mt-1 pt-2"
+                             aria-hidden="true">
 
-                            <form th:action="@{'/todos/' + ${todo.todoId} + '/patch'}" method="post" class="w-full">
-                                <button type="submit" class="text-left w-full block px-4 py-2 text-sm text-text-light hover:bg-card-dark rounded-t-lg">
+                            <button th:data-todo-id="${todo.todoId}"
+                                    th:onclick="'openEditTodoDrawer(' + ${todo.todoId} + ')'"
+                                    type="button"
+                                    class="text-left w-full block px-4 py-2 text-sm text-text-light hover:bg-card-dark rounded-t-lg">
+                                Edit Todo
+                            </button>
+
+                            <form th:action="@{'/todos/' + ${todo.todoId} + '/completed/toggle'}" method="post" class="w-full">
+                                <button type="submit" class="text-left w-full block px-4 py-2 text-sm text-text-light hover:bg-card-dark">
                                     <span th:text="${todo.completed} ? 'Mark as Pending' : 'Mark as Complete'">Toggle Status</span>
                                 </button>
                             </form>
@@ -62,8 +70,10 @@
                 </p>
 
                 <div class="mt-auto pt-3 border-t border-gray-700 flex justify-between items-center text-xs">
-                    <span class="text-text-secondary" th:text="'Created At: ' + ${#temporals.format(todo.dueDate, 'M/d/yyyy')}">
-                        Created At: 10/3/2025
+                    <span th:with="formattedDate=${todo.dueDate() != null ? #temporals.format(todo.dueDate, 'M/d/yyyy HH:mm') : 'N/A'}"
+                          class="text-text-secondary"
+                          th:text="'Due Date: ' + ${formattedDate}">
+                        Due Date: 10/3/2025
                     </span>
 
                     <span class="px-2 py-0.5 rounded-md font-medium"
@@ -81,19 +91,23 @@
 
         </div>
     </div>
-    <div id="drawer-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden" onclick="toggleNewTodoDrawer()"></div>
+
+    <div id="drawer-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden" onclick="closeTodoDrawer()"></div>
 
     <div id="new-todo-drawer"
          class="fixed top-0 right-0 w-80 h-full bg-card-dark shadow-2xl z-40 transform translate-x-full transition-transform duration-300 ease-in-out p-6 overflow-y-auto">
 
         <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
-            <h3 class="text-xl font-bold text-text-light">Create New Todo</h3>
-            <button onclick="toggleNewTodoDrawer()" class="text-text-secondary hover:text-text-light transition">
+            <h3 id="drawer-title" class="text-xl font-bold text-text-light">Create New Todo</h3>
+            <button onclick="closeTodoDrawer()" class="text-text-secondary hover:text-text-light transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
 
-        <form th:action="@{/todos}" th:object="${newTodo}" method="post" class="flex flex-col space-y-4">
+        <form id="todo-form" th:action="@{/todos}" th:object="${newTodo}" method="post" class="flex flex-col space-y-4">
+
+            <input type="hidden" id="todoId" name="id" value="" />
+            <input type="hidden" id="completed" name="completed" value="false" />
 
             <div>
                 <label for="title" class="block text-sm font-medium text-text-secondary mb-1">Title</label>
@@ -124,7 +138,7 @@
                        class="w-full bg-background-dark text-text-light border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary-green"/>
             </div>
 
-            <button type="submit"
+            <button type="submit" id="submit-button"
                     class="w-full bg-primary-green text-background-dark font-semibold py-3 rounded-lg hover:bg-green-400 transition duration-300 mt-4">
                 Save New Todo
             </button>
@@ -133,13 +147,72 @@
     </div>
 
     <script th:inline="javascript">
+        const TODO_API_PATH = /*[[@{/todos}]]*/ '/todos';
+
+        function formatDateTime(localDateTimeStr) {
+            if (!localDateTimeStr) return '';
+            return localDateTimeStr.substring(0, 16);
+        }
+
+        function openDrawer() {
+            document.getElementById('new-todo-drawer').classList.remove('translate-x-full');
+            document.getElementById('drawer-overlay').classList.remove('hidden');
+        }
+
+        function closeTodoDrawer() {
+            document.getElementById('new-todo-drawer').classList.add('translate-x-full');
+            document.getElementById('drawer-overlay').classList.add('hidden');
+            resetTodoForm();
+        }
+
+        function resetTodoForm() {
+            const form = document.getElementById('todo-form');
+            form.reset();
+
+            document.getElementById('drawer-title').innerText = 'Create New Todo';
+            document.getElementById('submit-button').innerText = 'Save New Todo';
+            document.getElementById('todoId').value = '';
+            document.getElementById('completed').value = 'false';
+            form.action = TODO_API_PATH;
+        }
+
         function toggleNewTodoDrawer() {
-            const drawer = document.getElementById('new-todo-drawer');
-            const overlay = document.getElementById('drawer-overlay');
+            resetTodoForm();
+            openDrawer();
+        }
 
-            drawer.classList.toggle('translate-x-full');
+        function openEditTodoDrawer(todoId) {
 
-            overlay.classList.toggle('hidden');
+            document.getElementById('drawer-title').innerText = 'Edit Task ' + todoId;
+            document.getElementById('submit-button').innerText = 'Update Todo';
+
+            const form = document.getElementById('todo-form');
+            form.action = TODO_API_PATH + '/' + todoId + '/update';
+            document.getElementById('todoId').value = todoId;
+
+            const fetchUrl = TODO_API_PATH + '/' + todoId + '/edit';
+
+            fetch(fetchUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(todo => {
+                    document.getElementById('title').value = todo.title || '';
+                    document.getElementById('description').value = todo.description || '';
+                    document.getElementById('priority').value = todo.priority || 'MEDIUM';
+                    document.getElementById('dueDate').value = todo.dueDate ? formatDateTime(todo.dueDate) : '';
+
+                    document.getElementById('completed').value = todo.completed ? 'true' : 'false';
+
+                    openDrawer();
+                })
+                .catch(error => {
+                    console.error('Error loading todo for edit:', error);
+                    alert('Could not load task details. Check API status or console.');
+                });
         }
     </script>
 

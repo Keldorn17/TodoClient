@@ -25,6 +25,14 @@ public class TodoUiService {
         return List.of(todos);
     }
 
+    public TodoResponse getTodoById(Long todoId, HttpServletRequest request) {
+        return apiClient.get(
+            ApiEndpoints.TODOS_URL + "/" + todoId,
+                TodoResponse.class,
+                request
+        );
+    }
+
     public void createTodo(TodoRequest todoRequest, HttpServletRequest request) {
         apiClient.post(ApiEndpoints.TODOS_URL, todoRequest, request);
     }
@@ -34,6 +42,10 @@ public class TodoUiService {
     }
 
     public void patchTodo(Long id, TodoRequest todoRequest, HttpServletRequest request) {
+        apiClient.patch(ApiEndpoints.TODOS_URL + "/" + id, todoRequest, request);
+    }
+
+    public <T> void patchGenericTodo(Long id, T todoRequest, HttpServletRequest request) {
         apiClient.patch(ApiEndpoints.TODOS_URL + "/" + id, todoRequest, request);
     }
 
