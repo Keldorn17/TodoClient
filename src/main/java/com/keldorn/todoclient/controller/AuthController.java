@@ -8,6 +8,7 @@ import com.keldorn.todoclient.util.ApiErrorParser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class AuthController {
@@ -31,14 +33,25 @@ public class AuthController {
     @PostMapping("/login")
     public String login(@ModelAttribute LoginRequest loginRequest, HttpServletRequest request, Model model) {
 
-        boolean success = authUiService.login(loginRequest, request);
+        try {
+            boolean success = authUiService.login(loginRequest, request);
 
-        if (!success) {
-            model.addAttribute("error", "Invalid credentials");
+            if (!success) {
+                model.addAttribute("error", "Authentication failed, please try again.");
+                return "auth/login";
+            }
+
+            return "redirect:/todos";
+
+        } catch (Exception ex) {
+            log.error("Login failed due to API error: {}", ex.getMessage());
+
+            String errorMessage = ApiErrorParser.getErrorMessage(ex.getMessage());
+            model.addAttribute("error", errorMessage);
+            model.addAttribute("loginRequest", loginRequest);
+
             return "auth/login";
         }
-
-        return "redirect:/todos";
     }
 
     @GetMapping("/register")

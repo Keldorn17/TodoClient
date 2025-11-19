@@ -2,78 +2,146 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/layout :: layout(
-          title='Todo List',
+          title='My Tasks',
           content=~{::content}
       )}">
 
 <th:block th:fragment="content">
 
-    <h1 class="text-3xl font-bold mb-6">Your Todos</h1>
+    <div class="max-w-7xl mx-auto">
 
-    <form th:action="@{/todos}" th:object="${newTodo}"
-          method="post"
-          class="flex gap-4 items-center mb-6">
+        <h1 class="text-3xl font-bold mb-6 text-white">My Tasks</h1>
 
-        <input th:field="*{title}" placeholder="New Todo..."
-               class="border rounded px-3 py-2 w-64"/>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-        <button type="submit"
-                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            Add
-        </button>
-    </form>
+            <div th:each="todo : ${todos}"
+                 th:with="p=${T(com.keldorn.todoclient.enums.Priority)},
+                          priorityColor=${todo.priority == p.HIGH ? 'border-red-400' : (todo.priority == p.MEDIUM ? 'border-yellow-400' : 'border-primary-green')}"
+                 class="bg-card-dark rounded-xl p-5 flex flex-col justify-between shadow-xl border-l-4"
+                 th:classappend="${todo.completed} ? 'border-gray-500 opacity-70' : ${priorityColor} + ' hover:shadow-2xl transition duration-300'">
 
-    <div class="bg-white shadow rounded p-6">
-        <table class="w-full table-auto">
-            <thead>
-            <tr class="border-b">
-                <th class="text-left py-2">Title</th>
-                <th class="text-center py-2">Completed</th>
-                <th class="text-center py-2">Actions</th>
-            </tr>
-            </thead>
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center space-x-3">
+                        <span class="w-4 h-4 rounded-full border-2"
+                              th:classappend="${todo.completed} ? 'bg-primary-green border-primary-green' : 'border-gray-500'"
+                              th:title="'Priority: ' + ${todo.priority}"></span>
 
-            <tbody>
-            <tr th:each="todo : ${todos}" class="border-b hover:bg-gray-50">
+                        <h2 class="text-lg font-semibold"
+                            th:classappend="${todo.completed} ? 'line-through text-gray-500' : 'text-text-light'"
+                            th:text="${todo.title}">
+                            Random Title
+                        </h2>
+                    </div>
 
-                <td class="py-2">
-                    <span th:text="${todo.title}"
-                          th:classappend="${todo.completed} ? 'line-through text-gray-400' : ''">
-                    </span>
-                </td>
-
-                <td class="text-center">
-                    <span th:if="${todo.completed}"
-                          class="bg-green-200 text-green-800 px-2 py-1 rounded text-sm">
-                        Done
-                    </span>
-                    <span th:if="${!todo.completed}"
-                          class="bg-yellow-200 text-yellow-800 px-2 py-1 rounded text-sm">
-                        Not Done
-                    </span>
-                </td>
-
-                <td class="text-center space-x-2">
-
-                    <form th:action="@{'/todos/' + ${todo.todoId} + '/patch'}"
-                          method="post" class="inline">
-                        <button class="px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">
-                            Toggle
+                    <div class="relative group">
+                        <button class="text-text-secondary hover:text-text-light">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
                         </button>
-                    </form>
 
-                    <form th:action="@{'/todos/' + ${todo.todoId} + '/delete'}"
-                          method="post" class="inline">
-                        <button class="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700">
-                            Delete
-                        </button>
-                    </form>
+                        <div class="absolute right-0 mt-2 w-48 bg-background-dark rounded-lg shadow-xl z-10 hidden group-hover:block">
 
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                            <form th:action="@{'/todos/' + ${todo.todoId} + '/patch'}" method="post" class="w-full">
+                                <button type="submit" class="text-left w-full block px-4 py-2 text-sm text-text-light hover:bg-card-dark rounded-t-lg">
+                                    <span th:text="${todo.completed} ? 'Mark as Pending' : 'Mark as Complete'">Toggle Status</span>
+                                </button>
+                            </form>
+
+                            <form th:action="@{'/todos/' + ${todo.todoId} + '/delete'}" method="post" class="w-full">
+                                <button type="submit" class="text-left w-full block px-4 py-2 text-sm text-red-400 hover:bg-card-dark rounded-b-lg">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <p th:text="${todo.description}"
+                   class="mt-2 mb-4 text-sm text-text-secondary overflow-hidden max-h-16"
+                   th:classappend="${todo.completed} ? 'line-through'">
+                    Description Description Description Description Description Description Description Description Description
+                </p>
+
+                <div class="mt-auto pt-3 border-t border-gray-700 flex justify-between items-center text-xs">
+                    <span class="text-text-secondary" th:text="'Created At: ' + ${#temporals.format(todo.dueDate, 'M/d/yyyy')}">
+                        Created At: 10/3/2025
+                    </span>
+
+                    <span class="px-2 py-0.5 rounded-md font-medium"
+                          th:classappend="${todo.priority == p.HIGH ? 'bg-red-900 text-red-300' : (todo.priority == p.MEDIUM ? 'bg-yellow-900 text-yellow-300' : 'bg-green-900 text-green-300')}"
+                          th:text="${#strings.capitalize(#strings.toLowerCase(todo.priority.name()))}">
+                        Priority
+                    </span>
+                </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(todos)}" class="col-span-full text-center py-12 text-text-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <p class="text-lg">No tasks yet! Click '+ New Todo' above to get started.</p>
+            </div>
+
+        </div>
     </div>
+    <div id="drawer-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden" onclick="toggleNewTodoDrawer()"></div>
+
+    <div id="new-todo-drawer"
+         class="fixed top-0 right-0 w-80 h-full bg-card-dark shadow-2xl z-40 transform translate-x-full transition-transform duration-300 ease-in-out p-6 overflow-y-auto">
+
+        <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
+            <h3 class="text-xl font-bold text-text-light">Create New Todo</h3>
+            <button onclick="toggleNewTodoDrawer()" class="text-text-secondary hover:text-text-light transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <form th:action="@{/todos}" th:object="${newTodo}" method="post" class="flex flex-col space-y-4">
+
+            <div>
+                <label for="title" class="block text-sm font-medium text-text-secondary mb-1">Title</label>
+                <input th:field="*{title}" id="title" placeholder="e.g., Finish UI Refactor" required
+                       class="w-full bg-background-dark text-text-light border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary-green placeholder-text-secondary"/>
+            </div>
+
+            <div>
+                <label for="description" class="block text-sm font-medium text-text-secondary mb-1">Description</label>
+                <textarea th:field="*{description}" id="description" placeholder="Optional details..."
+                          class="w-full bg-background-dark text-text-light border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary-green placeholder-text-secondary h-24"></textarea>
+            </div>
+
+            <div>
+                <label for="priority" class="block text-sm font-medium text-text-secondary mb-1">Priority</label>
+                <select th:field="*{priority}" id="priority"
+                        class="w-full bg-background-dark text-text-light border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary-green">
+                    <option th:each="p : ${T(com.keldorn.todoclient.enums.Priority).values()}"
+                            th:value="${p}" th:text="${#strings.capitalize(#strings.toLowerCase(p.name()))}"
+                            th:selected="${p.name() == 'MEDIUM'}">Priority
+                    </option>
+                </select>
+            </div>
+
+            <div>
+                <label for="dueDate" class="block text-sm font-medium text-text-secondary mb-1">Due Date (Optional)</label>
+                <input type="datetime-local" th:field="*{dueDate}" id="dueDate"
+                       class="w-full bg-background-dark text-text-light border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary-green"/>
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-primary-green text-background-dark font-semibold py-3 rounded-lg hover:bg-green-400 transition duration-300 mt-4">
+                Save New Todo
+            </button>
+        </form>
+
+    </div>
+
+    <script th:inline="javascript">
+        function toggleNewTodoDrawer() {
+            const drawer = document.getElementById('new-todo-drawer');
+            const overlay = document.getElementById('drawer-overlay');
+
+            drawer.classList.toggle('translate-x-full');
+
+            overlay.classList.toggle('hidden');
+        }
+    </script>
 
 </th:block>
 </html>

@@ -2,7 +2,9 @@ package com.keldorn.todoclient.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.keldorn.todoclient.dto.ApiErrorResponse;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public final class ApiErrorParser {
 
     private static ObjectMapper mapper = new ObjectMapper();
@@ -10,6 +12,7 @@ public final class ApiErrorParser {
     private static String UNKNOWN_ERROR = "Unknown error";
 
     public static String getErrorMessage(String errorMsg) {
+        log.warn("ERROR MESSAGE RECEIVED: {}", errorMsg);
         if (errorMsg == null) {
             return UNKNOWN_ERROR;
         }

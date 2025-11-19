@@ -1,15 +1,35 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<th:block th:replace="~{fragments/layout :: layout(
-        title='Welcome',
-        content=~{::thisContent}
-)}"></th:block>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(
+          title='Welcome',
+          content=~{::thisContent}
+      )}">
 
 <th:block th:fragment="thisContent">
-    <div class="text-center mt-20">
-        <h1 class="text-4xl font-bold">Welcome to the Todo Client</h1>
-        <a href="/login" class="text-blue-500 underline mt-4 block">Login</a>
-        <a href="/register" class="text-blue-500 underline block">Register</a>
+    <div class="flex flex-col items-center justify-center min-h-[calc(100vh-180px)] p-8">
+        <div class="bg-card-dark rounded-xl p-12 shadow-2xl max-w-lg w-full text-center">
+
+            <h1 class="text-4xl font-extrabold text-primary-green mb-4">
+                Todo Web App
+            </h1>
+
+            <p class="text-text-secondary text-lg mb-8">
+                Your modern, dark-themed dashboard for staying organized.
+            </p>
+
+            <div class="space-y-4">
+                <a th:href="@{/login}"
+                   class="inline-block w-full py-3 px-6 bg-primary-green text-background-dark font-semibold rounded-lg hover:bg-green-400 transition duration-300 transform hover:scale-105 shadow-md">
+                    Log In to Continue
+                </a>
+
+                <a th:href="@{/register}"
+                   class="inline-block w-full py-3 px-6 border border-gray-600 text-text-light font-medium rounded-lg hover:bg-background-dark transition duration-300">
+                    Create New Account
+                </a>
+            </div>
+
+        </div>
     </div>
 </th:block>
 </html>
