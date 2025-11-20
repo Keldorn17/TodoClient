@@ -4,6 +4,7 @@ import com.keldorn.todoclient.api.ApiClient;
 import com.keldorn.todoclient.constant.ApiEndpoints;
 import com.keldorn.todoclient.dto.JwtResponse;
 import com.keldorn.todoclient.dto.LoginRequest;
+import com.keldorn.todoclient.dto.UserRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,7 @@ public class AuthUiService {
 
     public boolean login(LoginRequest loginRequest, HttpServletRequest request) {
         JwtResponse response = apiClient.postAndReturn(
-                ApiEndpoints.AUTH_LOGIN_URL,
+                ApiEndpoints.AUTHENTICATION_URL,
                 loginRequest,
                 JwtResponse.class,
                 request
@@ -28,6 +29,10 @@ public class AuthUiService {
 
         request.getSession().setAttribute("JWT", response.token());
         return true;
+    }
+
+    public void register(UserRequest userRequest, HttpServletRequest servletRequest) {
+        apiClient.post(ApiEndpoints.USERS_URL, userRequest, servletRequest);
     }
 
     public void logout(HttpServletRequest request) {

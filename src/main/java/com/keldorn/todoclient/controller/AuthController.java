@@ -3,7 +3,6 @@ package com.keldorn.todoclient.controller;
 import com.keldorn.todoclient.dto.LoginRequest;
 import com.keldorn.todoclient.dto.UserRequest;
 import com.keldorn.todoclient.service.AuthUiService;
-import com.keldorn.todoclient.service.UserUiService;
 import com.keldorn.todoclient.util.ApiErrorParser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class AuthController {
 
     private final AuthUiService authUiService;
-    private final UserUiService userUiService;
 
     @GetMapping("/login")
     public String loginPage(Model model) {
@@ -72,7 +70,7 @@ public class AuthController {
         }
 
         try {
-            userUiService.register(userRequest, request);
+            authUiService.register(userRequest, request);
             return "redirect:/login?registered";
 
         } catch (Exception ex) {
